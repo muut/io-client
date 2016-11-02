@@ -110,7 +110,7 @@ window.muutio = function(path, conf, fn) {
 
   self.start = function(params, fn) {
 
-    self.call('init', params, function(data) {
+    self.call('init', params, function(json) {
 
       // close old session
       close()
@@ -127,7 +127,7 @@ window.muutio = function(path, conf, fn) {
       // start polling
       var poll = !navigator.userAgent.toLowerCase().split('googlebot')[1] && conf.poll !== false
 
-      if (session && poll) {
+      if (self.session && poll) {
         try {
           if (window.EventSource) sse()
           else longpoll()
@@ -189,7 +189,7 @@ window.muutio = function(path, conf, fn) {
 
 
   function close() {
-    delete session.channelId
+    delete self.session.channelId
 
     if (channel && channel.readyState == 1) {
       channel.close()
@@ -217,9 +217,11 @@ window.muutio = function(path, conf, fn) {
   var channel
 
   function sse() {
-    if (!session.channelId) return
+    var sess = self.session
 
-    channel = new EventSource(eventHost() + '/sse/' + session.sessionId + '/' + session.channelId)
+    if (!sess.channelId) return
+
+    channel = new EventSource(eventHost() + '/sse/' + sess.sessionId + '/' + sess.channelId)
 
     channel.onmessage = function(e) {
       onreceive(JSON.parse(e.data))
@@ -236,9 +238,9 @@ window.muutio = function(path, conf, fn) {
   var conn
 
   function longpoll() {
-    if (!session.channelId) return
+    if (!self.session.channelId) return
 
-    var params = $.extend({ transport: 'ajax' }, session)
+    var params = $.extend({ transport: 'ajax' }, self.session)
 
     conn = $.post(eventHost() + '/notifications', params, null, 'json').done(function(json) {
       onreceive(json)
