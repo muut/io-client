@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+
+<head>
+  <title>Muut IO client</title>
+</head>
+
+<body>
+  <script src="jquery.min.js"></script>
+  <script src="../muutio.js"></script>
+  <script>
+  var muut = muutio('goma', { host: 'http://localhost:3000' }, function() {
+
+    console.info('ready')
+
+  })
+  </script>
+</body>
+
