@@ -26,13 +26,22 @@ a {
   cursor: pointer;
 }
 
-textarea {
+select {
+  font-size: 18px;
+}
+
+input[type=text], textarea {
   border: 1px solid #ccc;
   font-size: 100%;
-  padding: .5em;
-  height: 3em;
+  padding: .8em;
   width: 100%;
+}
+
+textarea {
+  height: 3em;
   resize: none;
+  position: relative;
+  top: -1px;
 }
 
 .thread form {
@@ -65,7 +74,7 @@ form p {
 }
 
 .reply .avatar {
-  width: 3em;
+  width: 2.2em;
 }
 
 main {

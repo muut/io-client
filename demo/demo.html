@@ -7,13 +7,19 @@
     <a if={ logged } onclick={ logout }>Log out</a>
   </header>
 
-  <form onsubmit={ post } if={ logged }>
-    <textarea name="area" placeholder="What's on your mind?"/>
+  <!-- post new thread -->
+  <form onsubmit={ newThread } if={ logged }>
+    <input type="text" name="title" placeholder="What's on your mind?">
+    <textarea name="body"/>
     <p>
+      <select name="cat">
+        <option each={ data.categories } value={ path }>{ title }</option>
+      </select>
       <button>Post</button>
     </p>
   </form>
 
+  <!-- thread list -->
   <div class="thread" each={ threads }>
     <img class="avatar" src={ seed.user.img }>
 
@@ -31,7 +37,7 @@
     </div>
 
     <form onsubmit={ reply } if={ logged }>
-      <textarea name="area" placeholder="Reply..."/>
+      <textarea name="body" placeholder="Reply..."/>
       <p>
         <button>Reply</button>
       </p>
@@ -61,20 +67,51 @@
       })
     }
 
-    post(e) {
+    newThread(e) {
+      var form = e.target,
+        title = form.title.value,
+        body = form.body
 
+      // title must be given
+      if (!title) return
+
+      // construct seed data
+      var seed = {
+        key: title.replace(/\W+/, '').toLowerCase(),
+        body: body.value.split('\n'),
+        path: form.cat.value,
+        title: title
+      }
+
+      // new thread for rendering
+      var thread = { seed: seed, replies: [] }
+
+      // store to IO
+      api.call("createMoot", seed, function(path) {
+        thread.path = seed.path + '#' + path
+      })
+
+      // clean form
+      form.title.value = ''
+      body.value = ''
+
+      // render
+      seed.user = data.user
+      self.threads.unshift(thread)
+      self.update()
     }
+
 
     reply(e) {
       var thread = e.item,
         form = e.target
 
-      var body = form.area.value.split('\n')
+      var body = form.body.value.split('\n')
 
       api.call('reply', { path: thread.path, body: body, key: body[0].slice(0, 20) })
 
       thread.replies.push({ body: body, user: data.user })
-      form.area.value = ''
+      form.body.value = ''
       self.update()
 
     }
@@ -100,6 +137,15 @@
       }
     }
 
+    // new thread event
+    api.on('moot', function(thread, seed) {
+      thread.seed = seed
+      thread.replies = []
+      self.threads.unshift(thread)
+      self.update()
+    })
+
+    // new reply event
     api.on('reply', function(path, reply) {
       var thread = getThread(path)
       if (thread) {
@@ -107,6 +153,7 @@
         self.update()
       }
     })
+
   </script>
 
 </muut-demo>
