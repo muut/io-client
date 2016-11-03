@@ -389,7 +389,16 @@ function post(host, data, fn) {
   var conn = new XMLHttpRequest()
 
   conn.onload = function(e) {
-    fn(JSON.parse(e.target.response))
+    var status = conn.status
+    if (status >= 200 && status < 400) {
+      fn(JSON.parse(e.target.response))
+    } else {
+      fn({ error: conn.statusText, status: status })
+    }
+  }
+
+  conn.onerror = function(e) {
+    fn({ error: e })
   }
 
   conn.open('POST', host)

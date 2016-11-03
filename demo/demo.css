@@ -3,18 +3,14 @@
   box-sizing: border-box;
 }
 
-button {
-  padding: .5em 1em;
-  background: #fff;
-  border: 1px solid #ccc;
-  font-size: 100%;
-  border-radius: 3em;
-}
-
 body {
   font-family: avenir next, myriad pro, sans-serif;
   max-width: 600px;
   margin: 5% auto;
+}
+
+.loading {
+  color: #999;
 }
 
 header {
@@ -24,6 +20,14 @@ header {
 
 a {
   cursor: pointer;
+}
+
+h3 {
+  margin: 0;
+}
+
+p {
+  margin: 0 0 1em;
 }
 
 select {
@@ -44,8 +48,16 @@ textarea {
   top: -1px;
 }
 
+button {
+  padding: .5em 1em;
+  background: #fff;
+  border: 1px solid #ccc;
+  font-size: 100%;
+  border-radius: 3em;
+}
+
 .thread form {
-  margin-left: 5.5em;
+  margin-left: 4.5em;
 }
 
 form p {
@@ -56,6 +68,15 @@ form p {
   margin-bottom: 2em;
   border-left: 1px solid #ddd;
   padding-left: .6em;
+}
+
+main {
+  width: 500px;
+  margin-bottom: 1em;
+}
+
+.seed {
+  min-height: 4em;
 }
 
 .avatar {
@@ -77,15 +98,3 @@ form p {
   width: 2.2em;
 }
 
-main {
-  width: 500px;
-  margin-bottom: 1em;
-}
-
-h3 {
-  margin: 0;
-}
-
-p {
-  margin: 0 0 1em;
-}

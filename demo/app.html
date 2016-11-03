@@ -23,7 +23,7 @@
   <div class="thread" each={ threads }>
     <img class="avatar" src={ seed.user.img }>
 
-    <main>
+    <main class="seed">
       <h3>{ seed.title }</h3>
       <p each={ para in seed.body }>{ para }</p>
     </main>
@@ -87,8 +87,8 @@
       var thread = { seed: seed, replies: [] }
 
       // store to IO
-      api.call("createMoot", seed, function(path) {
-        thread.path = seed.path + '#' + path
+      api.call('createThread', seed, function(key) {
+        thread.path = seed.path + '#' + key
       })
 
       // clean form
@@ -106,11 +106,13 @@
       var thread = e.item,
         form = e.target
 
-      var body = form.body.value.split('\n')
+      var body = form.body.value.split('\n'),
+        reply = { path: thread.path, body: body }
 
-      api.call('reply', { path: thread.path, body: body, key: body[0].slice(0, 20) })
+      api.call('reply', reply, function(key) { reply.key = key })
 
-      thread.replies.push({ body: body, user: data.user })
+      reply.user = data.user
+      thread.replies.push(reply)
       form.body.value = ''
       self.update()
 
@@ -119,7 +121,7 @@
     /*
       Receive event upon succesfull login.
 
-      Session info is stored in localStorage so subsequent initializations are authenticated.
+      Session info is stored in localStorage so the next calls are authenticated.
     */
     api.on('login', function() {
 
@@ -157,3 +159,4 @@
   </script>
 
 </muut-demo>
+
