@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<title>Rendering threads</title>
+
+<link rel="stylesheet" href="demo.css">
+
+<body>
+
+  <muut-demo></muut-demo>
+
+  <script src="riot.js"></script>
+  <script type="riot/tag" src="demo.tag"></script>
+  <script src="../muutio.js"></script>
+  <script src="util.js"></script>
+  <script>
+    muutio('playground', { host: 'https://devapi.muut.com', _host: 'http://localhost:3000' }, function(data) {
+      riot.mount('muut-demo', { data: data, api: this })
+    })
+  </script>
+
+</body>

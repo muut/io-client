@@ -1,6 +1,6 @@
 !function() {
 
-window.muutio = function(path, conf, fn) {
+window.muutio = function(project, conf, fn) {
 
   if (isFn(conf)) { fn = conf; conf = {} }
 
@@ -14,6 +14,8 @@ window.muutio = function(path, conf, fn) {
   if (online === undefined) online = true
 
   self.session = conf.session || { sessionId: localStorage['jsonrpc.session'] }
+
+  self.path = '/' + project
 
   self.call = function(method) {
     if (!online) throw 'not connected'
@@ -256,7 +258,7 @@ window.muutio = function(path, conf, fn) {
 
   }
 
-  self.start({ path: '/' + path  }, fn)
+  self.start({ path: self.path  }, fn)
 
   return self
 

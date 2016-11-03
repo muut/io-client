@@ -1,8 +1,46 @@
 
+* {
+  box-sizing: border-box;
+}
+
+button {
+  padding: .5em 1em;
+  background: #fff;
+  border: 1px solid #ccc;
+  font-size: 100%;
+  border-radius: 3em;
+}
+
 body {
   font-family: avenir next, myriad pro, sans-serif;
-  max-width: 700px;
+  max-width: 600px;
   margin: 5% auto;
+}
+
+header {
+  margin-bottom: 2em;
+  text-align: right;
+}
+
+a {
+  cursor: pointer;
+}
+
+textarea {
+  border: 1px solid #ccc;
+  font-size: 100%;
+  padding: .5em;
+  height: 3em;
+  width: 100%;
+  resize: none;
+}
+
+.thread form {
+  margin-left: 5.5em;
+}
+
+form p {
+  text-align: right;
 }
 
 .thread {
