@@ -1,21 +1,13 @@
 <!DOCTYPE html>
 
-<title>Hello, World</title>
+<title>Rendering threads</title>
+<link rel="stylesheet" href="threads.css">
 
-<script src="../muutio.js"></script>
+<body>
+  <thread-list></thread-list>
 
-<script>
-// 'https://devapi.muut.com'
-var muut = muutio('playground', { host: 'http://localhost:3000' }, function(data) {
-  console.info(data)
-  // this.call('type', { path: '/playground/slides#blah-blah' })
-})
-
-
-// https://app.muut.com/account/auth/login/?path=/goma&channelId=&sessionId=
-
-muut.on('type', function(e) {
-  // console.info(e)
-})
-</script>
-
+  <script src="riot.js"></script>
+  <script type="riot/tag" src="thread-list.tag"></script>
+  <script src="../muutio.js"></script>
+  <script>riot.mount('thread-list')</script>
+</body>
