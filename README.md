@@ -24,24 +24,18 @@ The low leve API (muutio.js on the root of this repository) takes care of variou
 
 
 
-## Anatomy of Muut application
-
-1. initialize and render threads from the server data
-2. login -> reload with new data (thread expansion)
-3. post, reply, like, .... load history, metadata (fast render, no event for self)
-4. logout, disable UI widgets that aren't usable
-
-
-
 ## Hello, World
 
+Here's a minimal example to get you an idea how things work.
+
 ``` js
+// initialize "goma" community
 muutio('goma', function(data) {
 
-  // the client is ready
+  // the client is ready. use data (pictured below) to render the app
 
   // make calls...
-  this.call('type', { path: '/goma/gallery' }, function() {
+  this.call('reply', { path: '/goma/gallery#cafe', body: ['Great place!']  }, function() {
     // success
 
   }).fail(function() {
@@ -50,12 +44,28 @@ muutio('goma', function(data) {
   })
 
   // reveive events...
-  this.on('like', function(event, data) {
+  this.on('like', function(event) {
     console.info(event)
   })
 
 })
 ```
+
+Her's what the initial data for rendering the application looks like:
+
+![Initial data](demo/img/init.png)
+
+
+## Typical application flow
+
+1. Render the application with the initial data
+
+2. User performs login, call `init` and reload the client with the new data. The data is significantly different when logged in, for example the server remembers the threads that user has expanded and feds them with reply information.
+
+3. Perform actions, like post, reply, like, expand, load more replies etc.. A good practise is to render data immediately when it's available. There is no need to wait for response from the server when user replies for example since you already have all the key information available. The post id can be attached to the reply later too. This makes the client feel much more responsive.
+
+4. User performs logout. Most actions aren't permitted for anonymous users (such as posting and liking) so the relevant UI elements should be disabled or hidden.
+
 
 ## Methods
 
