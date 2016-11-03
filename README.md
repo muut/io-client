@@ -1,9 +1,8 @@
 
-## Changes
-- RPC --> muutio
-- event() --> on()
-- session() --> session
-- evented() --> observable()
+## Overview
+
+- low level api for Muut IO
+- just the essentials to get a quick start
 
 
 ## Features
@@ -13,7 +12,7 @@
   - automatic reconnection when back online
   - "ready", "close" and "reconnect" events
 - error handling (dealing with error_invalid_channel for example)
-- URL handling (randomly picking events-1/2/3.muut.com for example)
+- URL handling (randomly picking events-1/2/3.api.com for example)
 - deciding between longpoll and SSE
 - simple API (`call`, `on("like")`, ...)
 - ability to send multipart data (files and images)
@@ -22,30 +21,61 @@
 
 
 
-## Initialization
+## Hello, World
 
 ``` js
-var muut = muutio('goma', {})
+muutio('goma', function(data) {
 
-muut.on('like', function(event) {
-  console.info(event)
+  // the client is ready
+
+  // make calls...
+  this.call('type', { path: '/goma/gallery' }, function() {
+    // success
+
+  }).fail(function() {
+    // failure
+
+  })
+
+  // reveive events...
+  this.on('like', function(event, data) {
+    console.info(event)
+  })
+
 })
+```
+
+
+
+## Server connection
+
+
+```
+api.on('close', fn)
+
+api.on('reconnect', fn)
+
 ```
 
 ## Events
 
 ```
-muut.event('like unlike', fn).event('*', fn)
+api.on('like unlike', fn)
 
-// lifecycle methods
-muut.close()
-
-muut.connect()
-
-// lifecycle events
-muut.on('close', fn)
-
-muut.on('reconnect', fn)
-
+api.on('*', fn)
 ```
 
+## Event list
+
+```
+{
+  // name of the event
+  event: 'like'
+
+  // timestamp in seconds
+  ts: 1478161054
+
+
+  data: [IDENTICAL TO WHAT THE MUUT CLIENT GETS]
+}
+```

@@ -2,14 +2,13 @@
 
 window.muutio = function(path, conf, fn) {
 
-  if ($.isFunction(conf)) { fn = conf; conf = {} }
+  if (isFn(conf)) { fn = conf; conf = {} }
 
   conf = conf || {}
 
   var self = observable({}, ['ready', 'close', 'reconnect']),
       host = conf.host || 'https://client-api.muut.com',
       online = navigator.onLine
-
 
   // not supported
   if (online === undefined) online = true
@@ -25,7 +24,7 @@ window.muutio = function(path, conf, fn) {
         fn = args.slice(-1)[0]
 
 
-    if (!$.isFunction(fn)) {
+    if (!isFn(fn)) {
       if (fn !== undefined) params = args.slice(1)
       fn = undefined
     }
@@ -41,7 +40,7 @@ window.muutio = function(path, conf, fn) {
 
     // done action
     promise.done(function(json) {
-      fn && fn(json.result)
+      fn && fn.call(self, json.result)
     })
 
     // multipart
@@ -51,13 +50,12 @@ window.muutio = function(path, conf, fn) {
 
     // normal
     } else {
-      $.post(host, JSON.stringify(message).replace(/\?\?/g, '?&quest;'), function(json) {
+      post(host, message, function(json) {
         self.emit('receive', json, method)
         if (json.error) promise.fail(json.error)
         else promise.done(json)
         promise.always(json)
-
-      }, 'json')
+      })
 
     }
 
@@ -69,7 +67,7 @@ window.muutio = function(path, conf, fn) {
   function multipart(promise, message, files) {
     var data = new FormData()
 
-    $.each(files, function(i, file) {
+    files.forEach(function(file) {
       data.append(file.altname || file.name, file)
     })
 
@@ -93,7 +91,7 @@ window.muutio = function(path, conf, fn) {
 
   function setSession(s) {
     if (s && s.sessionId && s.channelId) {
-      self.session = $.extend({}, s)
+      self.session = extend({}, s)
 
       try {
         localStorage['jsonrpc.session'] = s.sessionId
@@ -102,18 +100,14 @@ window.muutio = function(path, conf, fn) {
     }
   }
 
-  // update session
-  self.on('receive', function(json) {
+  // update session, access to json data
+  self.on('receive', function(json, method) {
     setSession(json.session)
-  })
 
-
-  self.start = function(params, fn) {
-
-    self.call('init', params, function(json) {
-
+    if (method == 'init') {
       // close old session
       close()
+
       setSession(json.session)
 
       // time
@@ -121,8 +115,15 @@ window.muutio = function(path, conf, fn) {
 
       // ready
       self.ready(json.result)
+    }
+  })
 
-      fn && fn()
+
+  self.start = function(params, fn) {
+
+    self.call('init', params, function(data) {
+
+      fn && fn.call(self, data)
 
       // start polling
       var poll = !navigator.userAgent.toLowerCase().split('googlebot')[1] && conf.poll !== false
@@ -156,7 +157,7 @@ window.muutio = function(path, conf, fn) {
 
       var diff = pong && Date.now() - pong
 
-      if (diff > 60 * 1000 && is_online) {
+      if (diff > 60 * 1000 && online) {
         pong = Date.now()
         setTimeout(reconnect, 2000)
       }
@@ -240,9 +241,9 @@ window.muutio = function(path, conf, fn) {
   function longpoll() {
     if (!self.session.channelId) return
 
-    var params = $.extend({ transport: 'ajax' }, self.session)
+    var params = extend({ transport: 'ajax' }, self.session)
 
-    conn = $.post(eventHost() + '/notifications', params, null, 'json').done(function(json) {
+    conn = post(eventHost() + '/notifications', params, function(json) {
       onreceive(json)
       if (json.error) conn.abort()
       else longpoll()
@@ -266,15 +267,15 @@ function observable(el, methods) {
 
   var slice = [].slice, callbacks = {}
 
-  $.extend(el, {
+  extend(el, {
 
     on: function(events, flag, fn) {
 
       events = events.split(' ')
 
-      if ($.isFunction(flag)) { fn = flag; flag = 0 }
+      if (isFn(flag)) { fn = flag; flag = 0 }
 
-      if ($.isFunction(fn)) {
+      if (isFn(fn)) {
         for (var i = 0, len = events.length, type; i < len; i++) {
           type = events[i].trim()
           ;(callbacks[type] = callbacks[type] || []).push(fn)
@@ -324,7 +325,7 @@ function observable(el, methods) {
         fn.apply(el, arguments)
       }
 
-      if ($.isFunction(fn)) {
+      if (isFn(fn)) {
         on.listener = fn
         el.on(type, on)
       }
@@ -357,9 +358,9 @@ function observable(el, methods) {
   })
 
 
-  $.each(methods || [], function(i, name) {
+  methods.forEach(function(name) {
     el[name] = function(arg) {
-      return $.isFunction(arg) ? el.on(name, arg) : el.emit.apply(el, [name].concat(slice.call(arguments)))
+      return isFn(arg) ? el.on(name, arg) : el.emit.apply(el, [name].concat(slice.call(arguments)))
     }
   })
 
@@ -368,5 +369,33 @@ function observable(el, methods) {
 }
 
 
+
+
+function isFn(arg) {
+  return typeof arg == 'function'
+}
+
+function extend(obj, from) {
+  from && Object.keys(from).forEach(function(key) {
+    obj[key] = from[key]
+  })
+  return obj
+}
+
+
+function post(host, data, fn) {
+  var conn = new XMLHttpRequest()
+
+  conn.onload = function(e) {
+    fn(JSON.parse(e.target.response))
+  }
+
+  conn.open('POST', host)
+
+  var msg = JSON.stringify(data).replace(/\?\?/g, '?&quest;')
+  conn.send(msg)
+
+  return conn
+}
 
 }()

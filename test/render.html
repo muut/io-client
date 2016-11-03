@@ -6,9 +6,16 @@
 
 <script>
 // 'https://devapi.muut.com'
-muutio('playground', { host: 'http://localhost:3000' }, function(data) {
+var muut = muutio('playground', { host: 'http://localhost:3000' }, function(data) {
   console.info(data)
   // this.call('type', { path: '/playground/slides#blah-blah' })
+})
+
+
+// https://app.muut.com/account/auth/login/?path=/goma&channelId=&sessionId=
+
+muut.on('type', function(e) {
+  // console.info(e)
 })
 </script>
 
