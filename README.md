@@ -130,7 +130,6 @@ Here are possible events that you can listen to:
 - `leave` when user leaves the application
 - `like` when a post is liked
 - `login` when the current user log's into the system
-- `message` when a system message is sent
 - `meta` when a post metadata is updated
 - `remove` when a post was removed
 - `reply` when a new reply was posted to a thread
