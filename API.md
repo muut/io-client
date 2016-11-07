@@ -38,7 +38,7 @@ This is usually the first call to initialize the application. Returns all the av
 - `search`: an object to query data. See below:
 - `skip_truncate`: won't truncate the thread keys to 27 characters, which is the default setting.
 
-### `The search object`
+#### The search object
 
 - `version`: The version of the query syntax. Currently `1`.
 - `path`: The path where to query from such as '/playground/tests',
@@ -63,7 +63,7 @@ Like a given post and increase it's `like_count` and add an entry to the users t
 A "like" event is fired with path as the argument.
 
 
-### `Like & create a new thread`
+#### Like & create a new thread`
 You can also create a new thread just by liking a certain path. On this case you need to provide additional parameters as follows:
 
 - `path`: path of the thread such as "/goma/gallery#my-thread"
@@ -157,6 +157,11 @@ Disable all notifications for the user from a forum.
 
 - `forumname`: name of the forum
 
+## spam
+Flag a post as spammed. The impact of this action depends on the user. Admin has the most power.
+
+- `path`: the path of the post to be flagged as spam.
+
 
 ## `threadCollapse`
 Collapses a thread so only the basic information of the thread is returned.
@@ -229,7 +234,7 @@ Start receiving notifications from this trhread.
 - `path`: the path of the watched thread.
 
 
-### `Watch & create a new thread`
+#### Watch & create a new thread
 You can create a new thread just by watching a certain path. On this case you need to provide additional parameters as follows:
 
 - `path`: path of the thread such as "/goma/gallery#my-thread"
@@ -254,6 +259,12 @@ Unlike a post (take away the like flag).
 - `path`: path to the unliked post.
 
 An "unlike" event is fired with path as argument.
+
+## unspam
+Unmark a post from being spammed. The impact of this action depends on the user. Admin has the most power.
+
+- `path`: the path of the post to be unspammed.
+
 
 ## `userHide`
 Sets the user "invisible" so that the user is no longer listed on online user's list on the init return value.
