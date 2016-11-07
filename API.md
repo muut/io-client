@@ -1,16 +1,17 @@
 
 # Client API
 
+An alphabetical list of methods, their arguments, return values and the emitted events.
 
 
-## `accessRequest
+## `accessRequest`
 An request to grant access to a private forum for an anonymous user.
 
 - `forumname`: name of the forum
 - `username`: the email address for the user
 - `message`: message for the forum admins
 
-## `delete
+## `delete`
 Deletes a given thread or reply.
 
 - `path`: path to the reply or thread.
@@ -20,13 +21,13 @@ You must be admin or the owner of the post (in which case the post cannot be lon
 A "delete" event is fired.
 
 
-## `forumUnwatch
+## `forumUnwatch`
 Unwatches all posts that the current user is following.
 
 - `path`: the path of the current forum.
 
 
-## `init
+## `init`
 This is usually the first call to initialize the application. Returns all the available data for a single forum illustrated here:
 
 ![Init return value properties](demo/img/init.png)
@@ -37,7 +38,7 @@ This is usually the first call to initialize the application. Returns all the av
 - `search`: an object to query data. See below:
 - `skip_truncate`: won't truncate the thread keys to 27 characters, which is the default setting.
 
-### `The search object
+### `The search object`
 
 - `version`: The version of the query syntax. Currently `1`.
 - `path`: The path where to query from such as '/playground/tests',
@@ -46,7 +47,7 @@ This is usually the first call to initialize the application. Returns all the av
 
 
 
-## `isAvailable
+## `isAvailable`
 Check whether given field is available (and not yet reserved). Here's how you check for a single field:
 
 `this.call('isAvailable', { email: 'joo@cc.com' })`
@@ -54,7 +55,7 @@ Check whether given field is available (and not yet reserved). Here's how you ch
 Available fields are `username`, `email` and `name`.
 
 
-## `like
+## `like`
 Like a given post and increase it's `like_count` and add an entry to the users that liked the post to be returned with `whoLikes` call.
 
 - `path`: path to the liked post.
@@ -62,7 +63,7 @@ Like a given post and increase it's `like_count` and add an entry to the users t
 A "like" event is fired with path as the argument.
 
 
-### `Like & create a new thread
+### `Like & create a new thread`
 You can also create a new thread just by liking a certain path. On this case you need to provide additional parameters as follows:
 
 - `path`: path of the thread such as "/goma/gallery#my-thread"
@@ -71,7 +72,7 @@ You can also create a new thread just by liking a certain path. On this case you
 - `pageTitle`: the title of the hosting page
 
 
-## `logout
+## `logout`
 Logs out the current user and basic operations.
 
 - `path`: the root path of the forum where to log out such as "/goma/" *required*
@@ -81,14 +82,14 @@ The new initial data where posts are in anonymous state.
 
 
 
-## `more
+## `more`
 Gets the rest of the body if the post is large.
 
 - `path`: path to the post.
 
 
 
-## `moreReplies
+## `moreReplies`
 Get more replies for a given post
 
 - `path`: the path of the post such as "/gom/gallery#who-likes-this-art"
@@ -97,7 +98,7 @@ Returns an array of post objects.
 
 
 
-## `reply
+## `reply`
 Posts a new reply to a thread.
 
 - `path`: the path of the parent thread. *required*
@@ -111,7 +112,7 @@ Returns the possibly auto- generated key.
 A "reply" event is fired with path and the reply object as arguments.
 
 
-## `setCategories
+## `setCategories`
 Sets forum categories, ie. the discussion areas.
 
 - `path`: the forum path, such as "/goma"
@@ -128,7 +129,7 @@ Sets forum categories, ie. the discussion areas.
 A "categories" event is fired with the new categories as argument.
 
 
-## `setMeta
+## `setMeta`
 Set's metadata for a thread or post
 
 - `path`:
@@ -145,25 +146,25 @@ Set's metadata for a thread or post
 A "meta" event is fired with the metadata as argument.
 
 
-## `setNotificationsDisable
+## `setNotificationsDisable`
 Disable all notifications for the user from a forum.
 
 - `forumname`: name of the forum
 
 
-## `setNotificationsEnable
+## `setNotificationsEnable`
 Disable all notifications for the user from a forum.
 
 - `forumname`: name of the forum
 
 
-## `threadCollapse
+## `threadCollapse`
 Collapses a thread so only the basic information of the thread is returned.
 
 - `paths`: an array of thread paths to collapse.
 
 
-## `threadCreate
+## `threadCreate`
 Creates a new thread
 
 - `title`: message title. *required*
@@ -177,13 +178,13 @@ Returns the possibly auto- generated key.
 A "thread" event is fired with thread data as first argument and seed post data as the second argument.
 
 
-## `threadExpand
+## `threadExpand`
 Expands a thread and loads the seed posts and the recent replies. The expanded state of each thread is remembered for authenticated users.
 
 - `path`: a path to the thread to be expanded.
 
 
-## `threadMove
+## `threadMove`
 Move a thread from one channel to another.
 
 - `src`: the original channel
@@ -191,13 +192,13 @@ Move a thread from one channel to another.
 
 
 
-## `threadRetire
+## `threadRetire`
 Stops the thread from raising to the top (recent posts) when new replies are posted.
 
 - `path`: the path of the retired thread.
 
 
-## `threads
+## `threads`
 
 Returns 10 most recent threads.
 
@@ -209,26 +210,26 @@ Returns 10 most recent threads.
 Returns a list of thread objects.
 
 
-## `threadUnretire
+## `threadUnretire`
 Makes the thread behave normally so that it becomes the first on listings when new replies are posted.
 
 - `path`: the path of the unretired thread.
 
 
 
-## `threadUnwatch
+## `threadUnwatch`
 Stop receiving notifications from this trhread.
 
 - `path`: the path of the unwatched thread.
 
 
-## `threadWatch
+## `threadWatch`
 Start receiving notifications from this trhread.
 
 - `path`: the path of the watched thread.
 
 
-### `Watch & create a new thread
+### `Watch & create a new thread`
 You can create a new thread just by watching a certain path. On this case you need to provide additional parameters as follows:
 
 - `path`: path of the thread such as "/goma/gallery#my-thread"
@@ -237,7 +238,7 @@ You can create a new thread just by watching a certain path. On this case you ne
 - `pageTitle`: the title of the hosting page
 
 
-## `type
+## `type`
 Notifies other people that the current user is typing a message.
 
 - `path`: the path of the channel ("/goma/gallery") or thread ("/goma/gallery#my-thread")
@@ -247,26 +248,26 @@ A "type" event with the path and size information is fired.
 
 
 
-## `unlike
+## `unlike`
 Unlike a post (take away the like flag).
 
 - `path`: path to the unliked post.
 
 An "unlike" event is fired with path as argument.
 
-## `userHide
+## `userHide`
 Sets the user "invisible" so that the user is no longer listed on online user's list on the init return value.
 
 A "leave" event is fired.
 
 
-## `userShow
+## `userShow`
 Make the user visible on the online user list so that other people think the user is not online.
 
 An "enter" event is fired.
 
 
-## `userUpdate
+## `userUpdate`
 Updates the current user
 
 - `displayname`: The display name field name.
@@ -275,7 +276,7 @@ Updates the current user
 - `files`: the uploaded image as taken with `FileReader` on the client application. Supplied as single entry on an array `[ file ]`.
 
 
-## `whoLikes
+## `whoLikes`
 Retreives the list of users that have liked the given post.
 
 - `path`: path to the post.
