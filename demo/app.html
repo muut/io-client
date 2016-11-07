@@ -140,7 +140,7 @@
     }
 
     // new thread event
-    api.on('moot', function(thread, seed) {
+    api.on('thread', function(thread, seed) {
       thread.seed = seed
       thread.replies = []
       self.threads.unshift(thread)

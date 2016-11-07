@@ -1,21 +1,21 @@
 !function() {
+window.muutio = function(conf, opts, fn) {
 
-window.muutio = function(project, conf, fn) {
+  if (isFn(opts)) { fn = opts; opts = {} }
+  if (typeof conf == 'string') conf = { path: conf }
 
-  if (isFn(conf)) { fn = conf; conf = {} }
-
-  conf = conf || {}
+  opts = opts || {}
 
   var self = observable({}, ['ready', 'close', 'reconnect']),
-      host = conf.host || 'https://client-api.muut.com',
+      host = opts.host || 'https://client-api.muut.com',
       online = navigator.onLine
 
   // not supported
   if (online === undefined) online = true
 
-  self.session = conf.session || { sessionId: localStorage['jsonrpc.session'] }
+  self.session = opts.session || { sessionId: localStorage['jsonrpc.session'] }
 
-  self.path = '/' + project
+  self.path = conf.path || '/' + conf
 
   self.call = function(method) {
     if (!online) throw 'not connected'
@@ -121,6 +121,12 @@ window.muutio = function(project, conf, fn) {
   })
 
 
+  // use a better name
+  self.on('moot', function(thread, seed) {
+    self.emit('thread', thread, seed)
+  })
+
+
   self.start = function(params, fn) {
 
     self.call('init', params, function(data) {
@@ -128,7 +134,7 @@ window.muutio = function(project, conf, fn) {
       fn && fn.call(self, data)
 
       // start polling
-      var poll = !navigator.userAgent.toLowerCase().split('googlebot')[1] && conf.poll !== false
+      var poll = !navigator.userAgent.toLowerCase().split('googlebot')[1] && opts.poll !== false
 
       if (self.session && poll) {
         try {
@@ -258,13 +264,11 @@ window.muutio = function(project, conf, fn) {
 
   }
 
-  self.start({ path: self.path  }, fn)
+  self.start(conf, fn)
 
   return self
 
 }
-
-
 function observable(el, methods) {
 
   var slice = [].slice, callbacks = {}

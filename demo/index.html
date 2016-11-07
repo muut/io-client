@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 
-<title>Muut IO demo</title>
-
-<link rel="stylesheet" href="demo.css">
+<head>
+  <title>Muut IO demo</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
 
 <body>
 
@@ -10,10 +11,11 @@
     <span class="loading">Loading...</span>
   </muut-demo>
 
-  <script src="riot.js"></script>
-  <script type="riot/tag" src="app.html"></script>
-  <script src="../muutio.js"></script>
+  <script src="app.html" type="riot/tag"></script>
+  <script src="muutio.js"></script>
   <script src="login.js"></script>
+  <script src="riot.js"></script>
+
   <script>
     muutio('playground', function(data) {
       riot.mount('muut-demo', { data: data, api: this })

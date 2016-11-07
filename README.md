@@ -64,10 +64,13 @@ Her's what the initial data for rendering the application looks like:
 
 3. Perform actions, like post, reply, like, expand, load more replies etc.. A good practise is to render data immediately when it's available. There is no need to wait for response from the server when user replies for example since you already have all the key information available. The post id can be attached to the reply later too. This makes the client feel much more responsive.
 
-4. User performs logout. Most actions aren't permitted for anonymous users (such as posting and liking) so the relevant UI elements should be disabled or hidden.
+4. Listen to server events and update the client accordingly. A good client side framework helps here tremendously. Muut is wise enough to silent all events that originate from the current user. Only other users or other browser tabs will receive events.
+
+5. User performs logout. Most actions aren't permitted for anonymous users (such as posting and liking) so the relevant UI elements should be disabled or hidden.
 
 
-## Methods
+
+## Properties
 
 `time_offset` property for checking the difference between client and server
 

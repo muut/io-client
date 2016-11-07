@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<head>
+  <title>Muut IO filtering</title>
+</head>
+
+<body>
+
+  <script src="muutio.js"></script>
+
+  <script>
+    var conf = {
+      search: {
+        version: 1,
+        path: '/playground',
+        filter: { 'meta.public.assigned': 'zappa'},
+        sort: ['meta.public.priority']
+      }
+    }
+    muutio(conf, { host: 'https://devapi.muut.com' }, function(data) {
+
+    })
+  </script>
+
+</body>
+
