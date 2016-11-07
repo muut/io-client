@@ -145,3 +145,7 @@ Here are possible events that you can listen to:
 - `close` when a connection is closed
 - `reconnect` when a connection is re-established
 
+
+## API
+
+The API docs are on this [separate document](API.md)
