@@ -77,34 +77,72 @@ Her's what the initial data for rendering the application looks like:
 
 ## Events
 
-```
-api.on('like unlike', fn)
+The client sends various events during the operation. You can capture them as follows
 
-api.on('*', fn)
-```
+``` js
+api.on('like', function(path) {
 
-### Event list
+  // a post was liked
 
-```
-{
-  // name of the event
-  event: 'like'
-
-  // timestamp in seconds
-  ts: 1478161054
-
-
-  data: [IDENTICAL TO WHAT THE MUUT CLIENT GETS]
-}
+})
 ```
 
+You can listen to multiple events at once and the event name is provided on the first argument:
 
-## Connection lifecycle
+``` js
+api.on('like unlike', function(event_name, path) {
 
+  // a post was liked or unliked
 
+})
 ```
-api.on('close', fn)
 
-api.on('reconnect', fn)
+Using `one` you'll receive the event once after which the callback is no longer called. For example:
 
+``` js
+api.one('init', function(path) {
+
+  // not called when re-initialized
+
+})
 ```
+
+By using asterisk `*` as the event name you'll receive notifications from all events. This is a good way to study the various events or debug the application.
+
+``` js
+api.on('*', function(type) {
+
+  // lets see what comes trough the pipe
+  console.info(arguments)
+
+})
+```
+
+The `off` method removes the function from receiving events.
+
+### Event listing
+
+Here are possible events that you can listen to:
+
+- `banned` when the current user was banned by the system administartor
+- `enter` when a user enters a application
+- `join` when the current user registers to the system
+- `leave` when user leaves the application
+- `like` when a post is liked
+- `login` when the current user log's into the system
+- `message` when a system message is sent
+- `meta` when a post metadata is updated
+- `remove` when a post was removed
+- `reply` when a new reply was posted to a thread
+- `spam` when a post was marked spammed
+- `thread` when a new thread was created
+- `type` when user is typing a message
+- `unlike` when a post is unliked
+- `unspam` when a post is unspammed
+
+
+### Connection events
+
+- `close` when a connection is closed
+- `reconnect` when a connection is re-established
+
