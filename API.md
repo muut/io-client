@@ -65,6 +65,23 @@ api.call('accessRequest', {
 })
 ```
 
+## `aclGrant`
+Grant access rights for users.
+
+- `paths`: the channels that the users are granted access to. Currently only the root path (`['/']`) is allowed.
+
+- `rights`: the rights that are granted. Currently only moderator right is allowed, ie: `[ 'moderator' ]`.
+
+Basically this is currently a "makeModerator" call, but we'll add more granularity later.
+
+
+## `aclRevoke`
+Remove access rights for users.
+
+- `paths`: the channels that the users removed access from. Currently only the root path (`['/']`) is allowed .
+
+- `rights`: the rights that are removed. Currently only moderator right is allowed, ie: `[ 'moderator' ]`.
+
 
 ## `bannedUsers`
 
