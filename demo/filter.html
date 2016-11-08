@@ -10,7 +10,7 @@
 
   <script>
     var conf = {
-      search: {
+      query: {
         version: 1,
         path: '/playground',
         filter: { 'meta.public.assigned': 'zappa'},
@@ -24,3 +24,8 @@
 
 </body>
 
+```
+api.call('threads', { query: {} }, function(data) {
+
+})
+```

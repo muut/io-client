@@ -1,7 +1,27 @@
 
 # Client API
 
-An alphabetical list of methods, their arguments, return values and the emitted events.
+An alphabetical list of methods, their arguments, return values and the emitted events. All these method take this general pattern:
+
+```
+api.call('methodName', { param1: 'value', param2: 111, ... }, function(data) {
+
+  // successfull call, data is the return value
+
+}).done(function(data) {
+
+  // you can chain multiple done calls
+
+}).fail(function(error) {
+
+  // an error occurred
+
+}).always(function() {
+
+  // this is called on error and on fail
+
+})
+```
 
 
 ## `accessRequest`
@@ -10,6 +30,21 @@ An request to grant access to a private forum for an anonymous user.
 - `forumname`: name of the forum
 - `username`: the email address for the user
 - `message`: message for the forum admins
+
+For example:
+
+``` js
+api.call('accessRequest', {
+  forumname: 'teron',
+  username: 'yo@cc.com',
+  message: 'This is it'
+
+}, function(data) {
+  // success
+
+})
+```
+
 
 ## `delete`
 Deletes a given thread or reply.
@@ -28,23 +63,58 @@ Unwatches all posts that the current user is following.
 
 
 ## `init`
-This is usually the first call to initialize the application. Returns all the available data for a single forum illustrated here:
+This method is called internally when the client is initialized. It returns all the available data for a single forum illustrated here:
 
 ![Init return value properties](demo/img/init.png)
 
 - `path`: the mount path such as "/goma/galleries". Root path (/goma) returns all the recent posts from all channels. *required*
 - `expand_all`: whether all threads should be expanded by default. A common setting in commenting.
 - `embedUrl`: the location where the forum is embedded. This is used on the links in email notifications.
-- `search`: an object to query data. See below:
+- `query`: an object to query data. See below:
 - `skip_truncate`: won't truncate the thread keys to 27 characters, which is the default setting.
 
-#### The search object
+For example:
+
+``` js
+// called when user has succesfully logged in
+api.on('login', function() {
+
+  // re-initialize with the new "authenticated data"
+  api.call('init', { path: '/goma', expand_all: true }, function(data) {
+
+
+  })
+
+})
+```
+
+#### The query parameter
+
+You can attach any metadata to your posts and you can use the `query` parameter to filter and sort the returned data. This is only available for all trials and all plans of at least the **M** level and above.
 
 - `version`: The version of the query syntax. Currently `1`.
 - `path`: The path where to query from such as '/playground/tests',
 - `filter`: Only return posts with this metadata. For example `{  assigned: 'courtney' }`,
 - `sort`: The field used for sorting. For example `['priority']`
 
+Here's an imaginary example to find artists with most stars:
+
+``` js
+api.call('init', {
+  query: {
+    version: 1,
+    path: '/playground',
+    filter: {
+      'meta.public.str_tags': ['electric', 'techno'],
+      'meta.public.str_city': ['berlin', 'rome']
+    },
+    sort: ['meta.public.stars']
+
+}}, function(data) {
+
+
+})
+```
 
 
 ## `isAvailable`
@@ -157,7 +227,7 @@ Disable all notifications for the user from a forum.
 
 - `forumname`: name of the forum
 
-## spam
+## `spam`
 Flag a post as spammed. The impact of this action depends on the user. Admin has the most power.
 
 - `path`: the path of the post to be flagged as spam.
@@ -260,7 +330,7 @@ Unlike a post (take away the like flag).
 
 An "unlike" event is fired with path as argument.
 
-## unspam
+## `unspam`
 Unmark a post from being spammed. The impact of this action depends on the user. Admin has the most power.
 
 - `path`: the path of the post to be unspammed.
