@@ -3,7 +3,7 @@
 
 An alphabetical list of methods, their arguments, return values and the emitted events. All these method take this general pattern:
 
-```
+``` js
 api.call('methodName', { param1: 'value', param2: 111, ... }, function(data) {
 
   // successfull call, data is the return value
@@ -23,12 +23,32 @@ api.call('methodName', { param1: 'value', param2: 111, ... }, function(data) {
 })
 ```
 
+## `accessList`
+
+Get a list of users that are allowed to access the forum. Only valid for private forums.
+
+
+- `forumname`: name of the forum such as "goma"
+- `listRequested`: `true` to include access requests
+- `listAccepted`: `true` to include accepted requests
+- `listRejected`: `true` to include rejected requests
+
+
+## `accessChange`
+
+Accept or deny access for a user.
+
+- `username`: user's username or email address
+- `forumname`: name of the forum such as "goma"
+- `status`: either 'accept' or 'deny'
+
+
 
 ## `accessRequest`
 An request to grant access to a private forum for an anonymous user.
 
-- `forumname`: name of the forum
-- `username`: the email address for the user
+- `forumname`: the name of the forum such as "goma"
+- `username`: the username or email address for the user
 - `message`: message for the forum admins
 
 For example:
@@ -44,6 +64,23 @@ api.call('accessRequest', {
 
 })
 ```
+
+
+## `bannedUsers`
+
+Returns a list of banned users on a given forum.
+
+- `forumname`: the name of the forum such as "goma"
+
+
+## `banUser`
+
+Marks the user as banned. A banned user can log in but isn't allowed to post, like or make any kind of updates to the forum.
+
+- `username`: the username or email address of the banned the user
+- `bantime`: the time in seconds for how long the user will be banned
+
+If you want to "unban" a user set the `bantime` to a negative integer.
 
 
 ## `delete`
@@ -334,6 +371,12 @@ An "unlike" event is fired with path as argument.
 Unmark a post from being spammed. The impact of this action depends on the user. Admin has the most power.
 
 - `path`: the path of the post to be unspammed.
+
+## `userFind`
+
+Returns a list of users that matches a given username.
+
+- `username` the username to look for
 
 
 ## `userHide`
