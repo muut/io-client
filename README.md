@@ -8,6 +8,7 @@ It weights only 4kb and has no external dependencies. It works nicely with clien
 The low leve API (muutio.js on the root of this repository) takes care of various things that are common to any kind of real-time application.
 
 
+
 ## Features
 
 **Session management** so that all calls are authenticated after user logs in.
@@ -68,6 +69,7 @@ Her's what the initial data for rendering the application looks like:
 
 5. User performs logout. Most actions aren't permitted for anonymous users (such as posting and liking) so the relevant UI elements should be disabled or hidden.
 
+Please look for the commented [source code](demo/app.html) of our [demo application](//muut.com/io-demo) to see how all the above are tied together.
 
 
 ## Properties

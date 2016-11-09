@@ -2,7 +2,7 @@
 window.muutio = function(conf, opts, fn) {
 
   if (isFn(opts)) { fn = opts; opts = {} }
-  if (typeof conf == 'string') conf = { path: conf }
+  if (typeof conf == 'string') conf = { path: '/' + conf }
 
   opts = opts || {}
 
@@ -15,7 +15,7 @@ window.muutio = function(conf, opts, fn) {
 
   self.session = opts.session || { sessionId: localStorage['jsonrpc.session'] }
 
-  self.path = conf.path || '/' + conf
+  self.path = conf.path
 
   self.call = function(method) {
     if (!online) throw 'not connected'
