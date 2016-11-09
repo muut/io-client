@@ -25,6 +25,10 @@
 
     <main class="seed">
       <h3>{ seed.title }</h3>
+      <div class="meta">
+        <a each={ tag, i in seed.meta.public.str_tags }
+          class="tag tag{i}" onclick={ loadTag }>{ tag }</a>
+      </div>
       <p each={ para in seed.body }>{ para }</p>
     </main>
 
@@ -50,23 +54,12 @@
       api = opts.api,
       self = this
 
-    // context variables
+    // context variables for the UI
     this.threads = data.moots.entries
     this.logged = data.user.path
     this.data = data
 
-
-    // opens a new window (see util.js)
-    login() {
-      openLogin(api.session)
-    }
-
-    logout() {
-      api.call('logout', { path: api.path }, function() {
-        self.update({ logged: false })
-      })
-    }
-
+    // create a new thread
     newThread(e) {
       var form = e.target,
         title = form.title.value,
@@ -77,7 +70,7 @@
 
       // construct seed data
       var seed = {
-        key: title.replace(/\W+/, '').toLowerCase(),
+        meta: { public: { str_tags: stripTags(title + ' ' + body.value) }},
         body: body.value.split('\n'),
         path: form.cat.value,
         title: title
@@ -102,6 +95,7 @@
     }
 
 
+    // reply
     reply(e) {
       var thread = e.item,
         form = e.target
@@ -118,34 +112,14 @@
 
     }
 
-    /*
-      Receive event upon succesfull login.
-
-      Session info is stored in localStorage so the next calls are authenticated.
-    */
-    api.on('login', function() {
-
-      api.call('init', { path: api.path }, function(json) {
-        self.threads = json.moots.entries
-        self.data = data = json
-        self.logged = true
-        self.update()
-      })
-    })
-
-    function getThread(path) {
-      for (var i = 0, thread; (thread = self.threads[i]); i++) {
-        if (thread.path == path) return thread
-      }
-    }
-
-    // new thread event
+    // got a new thread event (from other user or browser tab)
     api.on('thread', function(thread, seed) {
       thread.seed = seed
       thread.replies = []
       self.threads.unshift(thread)
       self.update()
     })
+
 
     // new reply event
     api.on('reply', function(path, reply) {
@@ -155,6 +129,88 @@
         self.update()
       }
     })
+
+    // a function to find a thread (used above)
+    function getThread(path) {
+      for (var i = 0, thread; (thread = self.threads[i]); i++) {
+        if (thread.path == path) return thread
+      }
+    }
+
+
+    // a function to reload the client (on login, filtering by tag etc...)
+    function reload(conf) {
+      api.call('init', conf, function(json) {
+        self.threads = json.moots.entries
+        self.data = data = json
+        self.logged = true
+        self.update()
+      })
+    }
+
+    // click a tag --> load matching threads
+    loadTag(e) {
+      var tag = e.item.tag
+
+      reload({
+        query: {
+          filter: { 'meta.public.str_tags': [tag]},
+          path: api.path,
+          version: 1
+        }
+      })
+    }
+
+    // strip tags from title and body (used in newThread call)
+    function stripTags(str) {
+      return str.match(/\s#\w+\b/g).map(function(tag) {
+        return tag.trim().slice(1)
+      })
+    }
+
+
+    /*
+      Login by opening an authentication window.
+
+      You can also use your own user database:
+
+      http://learn.muut.com/manage-users/fed-id
+    */
+    login() {
+      var url = 'https://app.muut.com/account/auth/login/?path=/playground',
+        sess = api.session
+      url += '&sessionId=' + session.sessionId
+      url += '&channelId=' + session.channelId
+      openWindow(url, 800, 600)
+    }
+
+    // opens an URL on the center of the screen
+    function openWindow(url, width, height) {
+       var w = window,
+          left = (w.screenX || w.screenLeft) + (w.outerWidth - width) / 2,
+          top = (w.screenY || w.screenTop) + 50,
+          opts = "left=" +left+ ",top=" +top+ ",status=0,scrollbars=0,menubar=0";
+
+       w.open(url, "moot_popup", opts + ",width=" +width+ ",height=" +height).focus();
+    }
+
+
+    // logout call
+    logout() {
+      api.call('logout', { path: api.path }, function() {
+        self.update({ logged: false })
+      })
+    }
+
+    /*
+      Receive event upon succesfull login.
+
+      Session info is stored in localStorage so the next calls are authenticated.
+    */
+    api.on('login', function() {
+      reload({ path: api.path })
+    })
+
 
   </script>
 

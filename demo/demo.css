@@ -98,3 +98,38 @@ main {
   width: 2.2em;
 }
 
+
+/* tags */
+.meta {
+  margin-bottom: .6em;
+}
+
+.tag {
+  margin-right: .4em;
+  padding: .1em .6em;
+  background-color: #900;
+  border-radius: .2em;
+  font-size: 80%;
+  color: #fff;
+}
+
+.tag:hover {
+  box-shadow: 0 0 .1em #000;
+}
+
+.tag:active {
+  box-shadow: 0 0 .3em #000 inset;
+}
+
+.tag1 {
+  background-color: blue
+}
+
+.tag2 {
+  background-color: green
+}
+
+.tag3 {
+  background-color: orange
+}
+

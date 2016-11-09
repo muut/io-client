@@ -17,7 +17,7 @@
   <script src="riot.js"></script>
 
   <script>
-    muutio('playground', function(data) {
+    muutio('playground', { _host: '//localhost:3000' }, function(data) {
       riot.mount('muut-demo', { data: data, api: this })
     })
   </script>
