@@ -19,6 +19,12 @@
     </p>
   </form>
 
+  <!-- tag filter -->
+  <p if={ tag } class="current-tag">
+    Showing threads with <strong>{ tag }</strong> tag.
+    <a onclick={ clearFilter }>Show all threads</a>
+  </p>
+
   <!-- thread list -->
   <div class="thread" each={ threads }>
     <img class="avatar" src={ seed.user.img }>
@@ -140,17 +146,23 @@
 
     // a function to reload the client (on login, filtering by tag etc...)
     function reload(conf) {
+      conf = conf || { path: api.path }
+
       api.call('init', conf, function(json) {
-        self.threads = json.moots.entries
-        self.data = data = json
-        self.logged = true
-        self.update()
+        data = json
+
+        self.update({
+          threads: json.moots.entries,
+          logged: !!json.user.path,
+          data: data
+        })
+
       })
     }
 
     // click a tag --> load matching threads
     loadTag(e) {
-      var tag = e.item.tag
+      var tag = this.tag = e.item.tag
 
       reload({
         query: {
@@ -159,6 +171,11 @@
           version: 1
         }
       })
+    }
+
+    clearFilter() {
+      this.tag = null
+      reload()
     }
 
     // strip tags from title and body (used in newThread call)
@@ -179,8 +196,10 @@
     login() {
       var url = 'https://app.muut.com/account/auth/login/?path=/playground',
         sess = api.session
-      url += '&sessionId=' + session.sessionId
-      url += '&channelId=' + session.channelId
+
+      url += '&sessionId=' + sess.sessionId
+      url += '&channelId=' + sess.channelId
+
       openWindow(url, 800, 600)
     }
 
@@ -208,7 +227,7 @@
       Session info is stored in localStorage so the next calls are authenticated.
     */
     api.on('login', function() {
-      reload({ path: api.path })
+      reload()
     })
 
 

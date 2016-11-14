@@ -20,6 +20,7 @@ header {
 
 a {
   cursor: pointer;
+  color: #0ae;
 }
 
 h3 {
@@ -100,6 +101,15 @@ main {
 
 
 /* tags */
+.current-tag {
+  margin: 3em .8em;
+  color: #777;
+}
+
+.current-tag strong {
+  color: #000;
+}
+
 .meta {
   margin-bottom: .6em;
 }
@@ -107,7 +117,7 @@ main {
 .tag {
   margin-right: .4em;
   padding: .1em .6em;
-  background-color: #900;
+  background-color: #0ae;
   border-radius: .2em;
   font-size: 80%;
   color: #fff;
@@ -121,15 +131,4 @@ main {
   box-shadow: 0 0 .3em #000 inset;
 }
 
-.tag1 {
-  background-color: blue
-}
-
-.tag2 {
-  background-color: green
-}
-
-.tag3 {
-  background-color: orange
-}
 
