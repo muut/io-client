@@ -3,7 +3,7 @@
 
   <header>
     <strong if={ logged }>{ data.user.displayname } &bull;</strong>
-    <a if={ !logged } onclick={ login }>Log in</a>
+    <a if={ !logged } onclick={ opts.api.openLogin }>Log in</a>
     <a if={ logged } onclick={ logout }>Log out</a>
   </header>
 
@@ -86,7 +86,7 @@
       var thread = { seed: seed, replies: [] }
 
       // store to IO
-      api.call('createThread', seed, function(key) {
+      api.call('threadCreate', seed, function(key) {
         thread.path = seed.path + '#' + key
       })
 
@@ -185,35 +185,6 @@
       })
     }
 
-
-    /*
-      Login by opening an authentication window.
-
-      You can also use your own user database:
-
-      http://learn.muut.com/manage-users/fed-id
-    */
-    login() {
-      var url = 'https://app.muut.com/account/auth/login/?path=/playground',
-        sess = api.session
-
-      url += '&sessionId=' + sess.sessionId
-      url += '&channelId=' + sess.channelId
-
-      openWindow(url, 800, 600)
-    }
-
-    // opens an URL on the center of the screen
-    function openWindow(url, width, height) {
-       var w = window,
-          left = (w.screenX || w.screenLeft) + (w.outerWidth - width) / 2,
-          top = (w.screenY || w.screenTop) + 50,
-          opts = "left=" +left+ ",top=" +top+ ",status=0,scrollbars=0,menubar=0";
-
-       w.open(url, "moot_popup", opts + ",width=" +width+ ",height=" +height).focus();
-    }
-
-
     // logout call
     logout() {
       api.call('logout', { path: api.path }, function() {
@@ -224,12 +195,12 @@
     /*
       Receive event upon succesfull login.
 
-      Session info is stored in localStorage so the next calls are authenticated.
+      Session info is stored in localStorage so
+      all the following calls are authenticated.
     */
-    api.on('login', function() {
-      reload()
+    api.on('login reconnect', function() {
+      clearFilter()
     })
-
 
   </script>
 

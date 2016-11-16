@@ -1,7 +1,7 @@
 
 # Client API
 
-An alphabetical list of methods, their arguments, return values and the emitted events. All these method take this general pattern:
+An alphabetical list of methods names, their arguments, return values and the emitted events. All these method take this general pattern:
 
 ``` js
 api.call('methodName', { param1: 'value', param2: 111, ... }, function(data) {
@@ -216,7 +216,9 @@ Gets the rest of the body if the post is large.
 ## `moreReplies`
 Get more replies for a given post
 
-- `path`: the path of the post such as "/gom/gallery#who-likes-this-art"
+- `path`: the path of the post such as "/gom/gallery#who-likes-this-art".
+- `start`: the start index of the results.
+- `end`: the end index of the results.
 
 Returns an array of post objects.
 
@@ -299,10 +301,16 @@ Creates a new thread
 - `title`: message title. *required*
 - `path`: the target channel. *required*
 - `body`: the message body as array. each element in array represents a paragraph
-- `key`: the id of the post. Shown on the address bar.
+- `key`: a human readable id for the post. If you leave this out the key is auto-generated on the server and returned on the call.
 - `watch`: if `true` then the current users starts receiving email notifications about new replies.
 
 Returns the possibly auto- generated key.
+
+**NOTE** most calls on Muut require a `path` parameter. Thread path is constructed as follows:
+
+`[channel_path]#[returned_key]`
+
+For example "/playground/general#my-test-thread".
 
 A "thread" event is fired with thread data as first argument and seed post data as the second argument.
 

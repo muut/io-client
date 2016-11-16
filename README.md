@@ -35,6 +35,10 @@ muutio('goma', function(data) {
 
   // the client is ready. use data (pictured below) to render the app
 
+
+  // authenticate
+  $(someElement).click(this.openLogin)
+
   // make calls...
   this.call('reply', { path: '/goma/gallery#cafe', body: ['Great place!']  }, function() {
     // success
