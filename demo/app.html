@@ -76,11 +76,14 @@
 
       // construct seed data
       var seed = {
-        meta: { public: { str_tags: stripTags(title + ' ' + body.value) }},
         body: body.value.split('\n'),
         path: form.cat.value,
         title: title
       }
+
+      // tags?
+      var tags = stripTags(title + ' ' + body.value)
+      if (tags) seed.meta = { public: { str_tags: tags }}
 
       // new thread for rendering
       var thread = { seed: seed, replies: [] }
@@ -180,7 +183,8 @@
 
     // strip tags from title and body (used in newThread call)
     function stripTags(str) {
-      return str.match(/\s#\w+\b/g).map(function(tag) {
+      var tags = str.match(/\s#\w+\b/g)
+      return tags && tags.map(function(tag) {
         return tag.trim().slice(1)
       })
     }
@@ -199,7 +203,7 @@
       all the following calls are authenticated.
     */
     api.on('login reconnect', function() {
-      clearFilter()
+      self.clearFilter()
     })
 
   </script>

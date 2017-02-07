@@ -100,6 +100,103 @@ Marks the user as banned. A banned user can log in but isn't allowed to post, li
 If you want to "unban" a user set the `bantime` to a negative integer.
 
 
+## `conversationPost `
+
+Start a new private conversation.
+
+- `forumname`: the name of the forum/project
+- `participants`: an array of strings, the strings being the userid
+- `body`: a content body up to 2500 characters
+
+Returns conversationId
+
+
+## `conversationList`
+
+List private conversations.
+
+- `forumname`: the name of the forum/project
+- `start`: (optional) the start position to list from
+- `count`: (optional) the number to return
+
+Returns array of conversations
+
+
+## `conversationOpen`
+
+Open a single private conversation.
+
+- `forumname`: the name of the forum/project
+- `conversationId`: the id of the conversation to open
+- `start`: (optional) the start position to list messages from in the conversation
+- `count`: (optional) the number to of posts to return
+
+Returns array of posts
+
+
+## `conversationUserHide`
+
+Block user from receiving messages.
+
+- `username`: the user to hide future messages from (blocking essentially)
+- `returns`: success status
+
+## `conversationUserUnide`
+
+Unblock user from receiving messages.
+
+- `username`: the user to unhide future messages from (unblocking essentially)
+
+Returns success status
+
+
+## `conversationMute`
+
+Mutes the conversation so that it is no longer "bumbed" on top of the list when new replies arrive and the participants won't receive any notification emails.
+
+- `forumname`: the name of the forum/project
+- `conversationId`: the id of the conversation to mute
+
+Returns success status
+
+
+## `conversationUnute`
+
+Unmutes the conversation.
+
+- `forumname`: the name of the forum/project
+- `conversationId`: the id of the conversation to unmute
+
+Returns success status
+
+
+## `conversationHideList`
+
+Returns a list of users whose messages are currently hidden. No params needed.
+
+
+## `conversationPostRemove`
+
+Removes a single post in private conversation
+
+- `forumname`: the name of the forum/project
+- `conversationId`: the id of the conversation to remove a post from
+- `post`Id: the id of the post to remove in the conversation
+
+Returns success status
+
+
+## `conversationRemove`
+
+Removes a private conversation
+
+- `forumname`: the name of the forum/project
+- `conversationId`: the id of the conversation to remove
+
+Returns success status
+
+
+
 ## `delete`
 Deletes a given thread or reply.
 
@@ -343,6 +440,7 @@ Returns 10 most recent threads.
 - `expand_all`: whether all threads should be expanded by default.
 - `start`: the start offset of the results. Default `0` – start from the beginning.
 - `skip_truncate`: won't truncate the thread keys to 27 characters, which is the default setting.
+- `query`: an object to query data. See [query parameter](#the-query-parameter).
 
 Returns a list of thread objects.
 
