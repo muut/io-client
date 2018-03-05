@@ -179,7 +179,20 @@
 
         if (diff > 60 * 1000 && online) {
           pong = Date.now()
-          setTimeout(reconnect, 2000)
+          // setTimeout(reconnect, 2000)
+          if (!window.EventSource) { // if long polling
+            if (conn && conn.readyState > 0 && conn.readyState < 4) {
+              // don't reconnect, we still have a pending connection,
+            } else {
+              // only when readyState is 1 OR 4 we try to reconnect, but don't re-initialize
+              // setTimeout(reconnect, 2000)
+              longpoll()
+            }
+          } else { // SSE
+            if (channel) { channel.close() }
+            // setTimeout(reconnect, 2000)
+            sse() // prevent re-initialization of the app, just reconnect sse
+          }
         }
       }, 272)
     }
@@ -252,6 +265,14 @@
       if (!self.session.channelId) return
 
       var params = extend({ transport: 'ajax' }, self.session)
+
+      if (conn) {
+        if (conn.readyState > 0 && conn.readyState < 4) {
+          // 0 = UNSENT, 4 = DONE
+          // prevent multiple connections
+          return
+        }
+      }
 
       conn = post(eventHost() + '/notifications', params, function(json) {
         onreceive(json)
