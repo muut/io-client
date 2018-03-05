@@ -1,439 +1,410 @@
-!function() {
+!(function() {
+  function openLogin(session, path) {
+    var url = 'https://app.muut.com/account/auth/login/?path=' + path
+    url += '&sessionId=' + session.sessionId
+    url += '&channelId=' + session.channelId
 
+    openWindow(url, 750, 500)
+  }
 
-function openLogin(session, path) {
-  var url = 'https://app.muut.com/account/auth/login/?path=' + path
-  url += '&sessionId=' + session.sessionId
-  url += '&channelId=' + session.channelId
-
-  openWindow(url, 750, 500)
-}
-
-// opens an URL on the center of the screen
-function openWindow(url, width, height) {
-   var w = window,
+  // opens an URL on the center of the screen
+  function openWindow(url, width, height) {
+    var w = window,
       left = (w.screenX || w.screenLeft) + (w.outerWidth - width) / 2,
       top = (w.screenY || w.screenTop) + 50,
-      opts = "left=" +left+ ",top=" +top+ ",status=0,scrollbars=0,menubar=0";
+      opts = 'left=' + left + ',top=' + top + ',status=0,scrollbars=0,menubar=0'
 
-   w.open(url, "moot_popup", opts + ",width=" +width+ ",height=" +height).focus();
-}
-window.muutio = function(conf, opts, fn) {
+    w.open(url, 'moot_popup', opts + ',width=' + width + ',height=' + height).focus()
+  }
+  window.muutio = function(conf, opts, fn) {
+    if (isFn(opts)) {
+      fn = opts
+      opts = {}
+    }
+    if (typeof conf == 'string') conf = { path: '/' + conf }
 
-  if (isFn(opts)) { fn = opts; opts = {} }
-  if (typeof conf == 'string') conf = { path: '/' + conf }
+    opts = opts || {}
 
-  opts = opts || {}
-
-  var self = observable({}, ['ready', 'close', 'reconnect']),
+    var self = observable({}, ['ready', 'close', 'reconnect']),
       host = opts.host || 'https://client-api.muut.com',
       online = navigator.onLine
 
-  // not supported
-  if (online === undefined) online = true
+    // not supported
+    if (online === undefined) online = true
 
-  self.session = opts.session || { sessionId: localStorage['jsonrpc.session'] }
+    self.session = opts.session || { sessionId: localStorage['jsonrpc.session'] }
 
-  self.path = conf.path
+    self.path = conf.path
 
-  self.openLogin = function() {
-    openLogin(self.session, self.path)
-  }
+    self.openLogin = function() {
+      openLogin(self.session, self.path)
+    }
 
-  self.call = function(method) {
-    if (!online) throw 'not connected'
+    self.call = function(method) {
+      if (!online) throw 'not connected'
 
-    var message = { method: method, session: self.session, transport: 'ajax' },
+      var message = { method: method, session: self.session, transport: 'ajax' },
         args = [].slice.call(arguments),
         params = args.slice(1, -1),
         fn = args.slice(-1)[0]
 
+      if (!isFn(fn)) {
+        if (fn !== undefined) params = args.slice(1)
+        fn = undefined
+      }
 
-    if (!isFn(fn)) {
-      if (fn !== undefined) params = args.slice(1)
-      fn = undefined
-    }
+      message.params = params
 
-    message.params = params
+      // send
+      self.emit('send', method, message.params)
 
-    // send
-    self.emit('send', method, message.params)
-
-    // File(s)
-    var files = params && params[0] && params[0].files,
+      // File(s)
+      var files = params && params[0] && params[0].files,
         promise = observable({}, ['done', 'fail', 'always'])
 
-    // done action
-    promise.done(function(json) {
-      fn && fn.call(self, json.result)
-    })
-
-    // multipart
-    if (window.File && files) {
-      delete params[0].files
-      multipart(promise, message, files)
-
-    // normal
-    } else {
-      post(host, message, function(json) {
-        self.emit('receive', json, method)
-        if (json.error) promise.fail(json.error)
-        else promise.done(json)
-        promise.always(json)
+      // done action
+      promise.done(function(json) {
+        fn && fn.call(self, json.result)
       })
 
+      // multipart
+      if (window.File && files) {
+        delete params[0].files
+        multipart(promise, message, files)
+
+        // normal
+      } else {
+        post(host, message, function(json) {
+          self.emit('receive', json, method)
+          if (json.error) promise.fail(json.error)
+          else promise.done(json)
+          promise.always(json)
+        })
+      }
+
+      return promise
     }
 
-    return promise
-  }
+    // File handling
+    function multipart(promise, message, files) {
+      var data = new FormData()
 
+      files.forEach(function(file) {
+        data.append(file.altname || file.name, file)
+      })
 
-  // File handling
-  function multipart(promise, message, files) {
-    var data = new FormData()
+      data.append('jsonrpc', JSON.stringify(message))
 
-    files.forEach(function(file) {
-      data.append(file.altname || file.name, file)
-    })
+      // XHR
+      var xhr = new XMLHttpRequest()
 
-    data.append('jsonrpc', JSON.stringify(message))
+      xhr.onload = function(e) {
+        var json = JSON.parse(e.target.response)
+        promise.emit('done', json).emit('always', e)
+      }
 
-    // XHR
-    var xhr = new XMLHttpRequest()
+      xhr.onerror = function(e) {
+        promise.emit('fail', e).emit('always', e)
+      }
 
-    xhr.onload = function(e) {
-      var json = JSON.parse(e.target.response)
-      promise.emit('done', json).emit('always', e)
+      xhr.open('POST', host)
+      xhr.send(data)
     }
 
-    xhr.onerror = function(e) {
-      promise.emit('fail', e).emit('always', e)
+    function setSession(s) {
+      if (s && s.sessionId && s.channelId) {
+        self.session = extend({}, s)
+
+        try {
+          localStorage['jsonrpc.session'] = s.sessionId
+        } catch (e) {}
+      }
     }
 
-    xhr.open('POST', host)
-    xhr.send(data)
-  }
-
-  function setSession(s) {
-    if (s && s.sessionId && s.channelId) {
-      self.session = extend({}, s)
-
-      try {
-        localStorage['jsonrpc.session'] = s.sessionId
-      } catch (e) {}
-
-    }
-  }
-
-  // update session, access to json data
-  self.on('receive', function(json, method) {
-    setSession(json.session)
-
-    if (method == 'init') {
-      // close old session
-      close()
-
+    // update session, access to json data
+    self.on('receive', function(json, method) {
       setSession(json.session)
 
-      // time
-      self.time_offset = Date.now() - json.server_time * 1000
+      if (method == 'init') {
+        // close old session
+        close()
 
-      // ready
-      self.ready(json.result)
+        setSession(json.session)
+
+        // time
+        self.time_offset = Date.now() - json.server_time * 1000
+
+        // ready
+        self.ready(json.result)
+      }
+    })
+
+    // use a better name
+    self.on('moot', function(thread, seed) {
+      self.emit('thread', thread, seed)
+    })
+
+    self.start = function(params, fn) {
+      self.call('init', params, function(data) {
+        fn && fn.call(self, data)
+
+        // start polling
+        var poll = !navigator.userAgent.toLowerCase().split('googlebot')[1] && opts.poll !== false
+
+        if (self.session && poll) {
+          try {
+            if (window.EventSource) sse()
+            else longpoll()
+          } catch (e) {
+            console.error(e.stack || e)
+            longpoll()
+          }
+        }
+      })
     }
-  })
 
+    // lifecycle management
+    var pong
 
-  // use a better name
-  self.on('moot', function(thread, seed) {
-    self.emit('thread', thread, seed)
-  })
+    if (navigator.onLine !== undefined) {
+      setInterval(function() {
+        var flag = navigator.onLine
 
+        if (flag != online) {
+          self.emit(flag ? 'online' : 'offline')
+          online = flag
+        }
 
-  self.start = function(params, fn) {
+        var diff = pong && Date.now() - pong
 
-    self.call('init', params, function(data) {
+        if (diff > 60 * 1000 && online) {
+          pong = Date.now()
+          setTimeout(reconnect, 2000)
+        }
+      }, 272)
+    }
 
-      fn && fn.call(self, data)
+    function onreceive(json) {
+      pong = Date.now()
 
-      // start polling
-      var poll = !navigator.userAgent.toLowerCase().split('googlebot')[1] && opts.poll !== false
+      // heartbeat
+      if (!json || json == 'ok' || json == 'ping') return
 
-      if (self.session && poll) {
+      // error?
+      var err = json.error || (json.params && json.params.error)
+
+      if (!err) {
+        self.emit('receive', json)
+        self.emit.apply(self, json.params)
+      } else if (err == 'error_invalid_channel') {
+        reconnect()
+      } else {
+        throw err
+      }
+    }
+
+    function close() {
+      delete self.session.channelId
+
+      if (channel && channel.readyState == 1) {
+        channel.close()
+        self.emit('close')
+      } else if (conn && conn.readyState == 1) {
+        conn.abort()
+        self.emit('close')
+      }
+    }
+
+    function reconnect() {
+      close()
+      self.emit('reconnect')
+    }
+
+    function eventHost() {
+      var random = 1 + Math.round(Math.random() * 2)
+      return host.replace('client-api', 'events-' + random)
+    }
+
+    // one instance
+    var channel
+
+    function sse() {
+      var sess = self.session
+
+      if (!sess.channelId) return
+
+      channel = new EventSource(eventHost() + '/sse/' + sess.sessionId + '/' + sess.channelId)
+
+      channel.onmessage = function(e) {
+        onreceive(JSON.parse(e.data))
+      }
+
+      // reconnect
+      channel.onerror = function(e) {
+        channel.close()
+        setTimeout(sse, 2700)
+      }
+    }
+
+    var conn
+
+    function longpoll() {
+      if (!self.session.channelId) return
+
+      var params = extend({ transport: 'ajax' }, self.session)
+
+      conn = post(eventHost() + '/notifications', params, function(json) {
+        onreceive(json)
+        if (json.error) conn.abort()
+        else longpoll()
+      }).fail(function(xhr, event) {
+        setTimeout(longpoll, 2700)
         try {
-          if (window.EventSource) sse()
-          else longpoll()
+          conn.abort()
+        } catch (e) {}
+      })
+    }
 
-        } catch (e) {
-          console.error(e.stack || e)
-          longpoll()
+    self.start(conf, fn)
+
+    return self
+  }
+  function observable(el, methods) {
+    var slice = [].slice,
+      callbacks = {}
+
+    extend(el, {
+      on: function(events, flag, fn) {
+        events = events.split(' ')
+
+        if (isFn(flag)) {
+          fn = flag
+          flag = 0
         }
+
+        if (isFn(fn)) {
+          for (var i = 0, len = events.length, type; i < len; i++) {
+            type = events[i].trim()
+            ;(callbacks[type] = callbacks[type] || []).push(fn)
+            if (len > 1 || events == '*') fn.typed = true
+          }
+
+          if (flag) fn.typed ? fn('inline', flag) : fn(flag)
+        }
+
+        return el
+      },
+
+      off: function(events, fn) {
+        // remove all
+        if (events == '*') return (callbacks = {})
+
+        events = events.split(' ')
+
+        for (var j = 0, type; j < events.length; j++) {
+          type = events[j].trim()
+
+          // remove single type
+          if (!fn) {
+            callbacks[type] = []
+            continue
+          }
+
+          var fns = callbacks[type] || [],
+            pos = -1
+
+          for (var i = 0, len = fns.length; i < len; i++) {
+            if (fns[i] === fn || fns[i].listener === fn) {
+              pos = i
+              break
+            }
+          }
+
+          if (pos >= 0) fns.splice(pos, 1)
+        }
+
+        return el
+      },
+
+      // single event supported
+      one: function(type, fn) {
+        function on() {
+          el.off(type, fn)
+          fn.apply(el, arguments)
+        }
+
+        if (isFn(fn)) {
+          on.listener = fn
+          el.on(type, on)
+        }
+
+        return el
+      },
+
+      emit: function(type) {
+        var args = slice.call(arguments, 1),
+          fns = callbacks[type] || [],
+          all = callbacks['*']
+
+        if (all) fns = fns.concat(all)
+
+        for (var i = 0, len = fns.length, fn, added, params; i < len; ++i) {
+          fn = fns[i]
+
+          // possibly removed
+          if (!fn) continue
+
+          // add event argument when multiple listeners
+          params = fn.typed ? [type].concat(args) : args
+          if (fn.apply(el, params) === false) return el
+        }
+
+        return el
+      },
+    })
+
+    methods.forEach(function(name) {
+      el[name] = function(arg) {
+        return isFn(arg) ? el.on(name, arg) : el.emit.apply(el, [name].concat(slice.call(arguments)))
       }
     })
 
+    return el
   }
 
-  // lifecycle management
-  var pong
-
-  if (navigator.onLine !== undefined) {
-
-    setInterval(function() {
-      var flag = navigator.onLine
-
-      if (flag != online) {
-        self.emit(flag ? 'online' : 'offline')
-        online = flag
-      }
-
-      var diff = pong && Date.now() - pong
-
-      if (diff > 60 * 1000 && online) {
-        pong = Date.now()
-        setTimeout(reconnect, 2000)
-      }
-
-    }, 272)
-
+  function isFn(arg) {
+    return typeof arg == 'function'
   }
 
-  function onreceive(json) {
-    pong = Date.now()
+  function extend(obj, from) {
+    from &&
+      Object.keys(from).forEach(function(key) {
+        obj[key] = from[key]
+      })
+    return obj
+  }
 
-    // heartbeat
-    if (!json || json == 'ok' || json == 'ping') return
+  function post(host, data, fn) {
+    var conn = new XMLHttpRequest()
 
-    // error?
-    var err = json.error || json.params && json.params.error
-
-    if (!err) {
-      self.emit('receive', json)
-      self.emit.apply(self, json.params)
-
-    } else if (err == 'error_invalid_channel') {
-      reconnect()
-
-    } else {
-      throw err
+    conn.onload = function(e) {
+      var status = conn.status
+      if (status >= 200 && status < 400) {
+        fn(JSON.parse(e.target.response))
+      } else {
+        fn({ error: conn.statusText, status: status })
+      }
     }
 
-  }
-
-
-  function close() {
-    delete self.session.channelId
-
-    if (channel && channel.readyState == 1) {
-      channel.close()
-      self.emit('close')
-
-    } else if (conn && conn.readyState == 1) {
-      conn.abort()
-      self.emit('close')
+    conn.onerror = function(e) {
+      fn({ error: e })
     }
 
+    conn.open('POST', host)
+
+    var msg = JSON.stringify(data).replace(/\?\?/g, '?&quest;')
+    conn.send(msg)
+
+    return conn
   }
-
-  function reconnect() {
-    close()
-    self.emit('reconnect')
-  }
-
-
-  function eventHost() {
-    var random = 1 + Math.round(Math.random() * 2)
-    return host.replace('client-api', 'events-' + random)
-  }
-
-  // one instance
-  var channel
-
-  function sse() {
-    var sess = self.session
-
-    if (!sess.channelId) return
-
-    channel = new EventSource(eventHost() + '/sse/' + sess.sessionId + '/' + sess.channelId)
-
-    channel.onmessage = function(e) {
-      onreceive(JSON.parse(e.data))
-    }
-
-    // reconnect
-    channel.onerror = function(e) {
-      channel.close()
-      setTimeout(sse, 2700)
-    }
-
-  }
-
-  var conn
-
-  function longpoll() {
-    if (!self.session.channelId) return
-
-    var params = extend({ transport: 'ajax' }, self.session)
-
-    conn = post(eventHost() + '/notifications', params, function(json) {
-      onreceive(json)
-      if (json.error) conn.abort()
-      else longpoll()
-
-    }).fail(function(xhr, event) {
-      setTimeout(longpoll, 2700)
-      try { conn.abort() } catch(e) {} 
-
-    })
-
-  }
-
-  self.start(conf, fn)
-
-  return self
-
-}
-function observable(el, methods) {
-
-  var slice = [].slice, callbacks = {}
-
-  extend(el, {
-
-    on: function(events, flag, fn) {
-
-      events = events.split(' ')
-
-      if (isFn(flag)) { fn = flag; flag = 0 }
-
-      if (isFn(fn)) {
-        for (var i = 0, len = events.length, type; i < len; i++) {
-          type = events[i].trim()
-          ;(callbacks[type] = callbacks[type] || []).push(fn)
-          if (len > 1 || events == '*') fn.typed = true
-        }
-
-        if (flag) fn.typed ? fn('inline', flag) : fn(flag)
-      }
-
-      return el
-    },
-
-    off: function(events, fn) {
-
-      // remove all
-      if (events == '*') return callbacks = {}
-
-      events = events.split(' ')
-
-      for (var j = 0, type; j < events.length; j++) {
-
-        type = events[j].trim()
-
-        // remove single type
-        if (!fn) { callbacks[type] = []; continue }
-
-        var fns = callbacks[type] || [],
-          pos = -1
-
-        for (var i = 0, len = fns.length; i < len; i++) {
-          if (fns[i] === fn || fns[i].listener === fn) { pos = i; break }
-        }
-
-        if (pos >= 0) fns.splice(pos, 1)
-
-      }
-
-      return el
-
-    },
-
-    // single event supported
-    one: function(type, fn) {
-
-      function on() {
-        el.off(type, fn)
-        fn.apply(el, arguments)
-      }
-
-      if (isFn(fn)) {
-        on.listener = fn
-        el.on(type, on)
-      }
-
-      return el
-    },
-
-    emit: function(type) {
-
-      var args = slice.call(arguments, 1),
-        fns = callbacks[type] || [],
-        all = callbacks['*']
-
-      if (all) fns = fns.concat(all)
-
-      for (var i = 0, len = fns.length, fn, added, params; i < len; ++i) {
-        fn = fns[i]
-
-        // possibly removed
-        if (!fn) continue
-
-        // add event argument when multiple listeners
-        params = fn.typed ? [type].concat(args) : args
-        if (fn.apply(el, params) === false) return el
-      }
-
-      return el
-    }
-
-  })
-
-
-  methods.forEach(function(name) {
-    el[name] = function(arg) {
-      return isFn(arg) ? el.on(name, arg) : el.emit.apply(el, [name].concat(slice.call(arguments)))
-    }
-  })
-
-  return el
-
-}
-
-
-
-
-function isFn(arg) {
-  return typeof arg == 'function'
-}
-
-function extend(obj, from) {
-  from && Object.keys(from).forEach(function(key) {
-    obj[key] = from[key]
-  })
-  return obj
-}
-
-
-function post(host, data, fn) {
-  var conn = new XMLHttpRequest()
-
-  conn.onload = function(e) {
-    var status = conn.status
-    if (status >= 200 && status < 400) {
-      fn(JSON.parse(e.target.response))
-    } else {
-      fn({ error: conn.statusText, status: status })
-    }
-  }
-
-  conn.onerror = function(e) {
-    fn({ error: e })
-  }
-
-  conn.open('POST', host)
-
-  var msg = JSON.stringify(data).replace(/\?\?/g, '?&quest;')
-  conn.send(msg)
-
-  return conn
-}
-
-}()
+})()
