@@ -25,7 +25,7 @@
 
     opts = opts || {}
 
-    var self = observable({}, ['ready', 'close', 'reconnect']),
+    var self = observable({}, ['ready', 'close', 'reconnect', 'error']),
       host = opts.host || 'https://client-api.muut.com',
       online = navigator.onLine
 
@@ -65,6 +65,10 @@
       // done action
       promise.done(function(json) {
         fn && fn.call(self, json.result)
+      })
+
+      promise.fail(function(error){
+        self.error(error)
       })
 
       // multipart
