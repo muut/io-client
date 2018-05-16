@@ -1,4 +1,5 @@
 var muutio = (function() {
+  var localStorage = typeof window !== 'undefined' ? window.localStorage : {}
   function openLogin(session, path) {
     var url = 'https://app.muut.com/account/auth/login/?path=' + path
     url += '&sessionId=' + session.sessionId
@@ -9,7 +10,7 @@ var muutio = (function() {
 
   // opens an URL on the center of the screen
   function openWindow(url, width, height) {
-    var w = window,
+    var w = typeof window !== 'undefined' ? window : {},
       left = (w.screenX || w.screenLeft) + (w.outerWidth - width) / 2,
       top = (w.screenY || w.screenTop) + 50,
       opts = 'left=' + left + ',top=' + top + ',status=0,scrollbars=0,menubar=0'
@@ -27,7 +28,7 @@ var muutio = (function() {
 
     var self = observable({}, ['ready', 'close', 'reconnect', 'error']),
       host = opts.host || 'https://client-api.muut.com',
-      online = navigator.onLine
+      online = typeof navigator !== 'undefined' ? navigator.onLine : false
 
     // not supported
     if (online === undefined) online = true
@@ -72,7 +73,7 @@ var muutio = (function() {
       })
 
       // multipart
-      if (window.File && files) {
+      if (typeof window !== 'undefined' && window.File && files) {
         delete params[0].files
         multipart(promise, message, files)
 
@@ -153,11 +154,11 @@ var muutio = (function() {
         fn && fn.call(self, data)
 
         // start polling
-        var poll = !navigator.userAgent.toLowerCase().split('googlebot')[1] && opts.poll !== false
+        var poll = typeof navigator !== 'undefined' ? (!navigator.userAgent.toLowerCase().split('googlebot')[1] && opts.poll !== false) : false
 
         if (self.session && poll) {
           try {
-            if (window.EventSource) sse()
+            if (typeof window !== 'undefined' && window.EventSource) sse()
             else longpoll()
           } catch (e) {
             console.error(e.stack || e)
@@ -170,9 +171,9 @@ var muutio = (function() {
     // lifecycle management
     var pong
 
-    if (navigator.onLine !== undefined) {
+    if (typeof navigator !== 'undefined' && navigator.onLine !== undefined) {
       setInterval(function() {
-        var flag = navigator.onLine
+        var flag = typeof navigator !== 'undefined' ? navigator.onLine : false
 
         if (flag != online) {
           self.emit(flag ? 'online' : 'offline')
@@ -184,7 +185,7 @@ var muutio = (function() {
         if (diff > 60 * 1000 && online) {
           pong = Date.now()
           // setTimeout(reconnect, 2000)
-          if (!window.EventSource) { // if long polling
+          if (typeof window !== 'undefined' && !window.EventSource) { // if long polling
             if (conn && conn.readyState > 0 && conn.readyState < 4) {
               // don't reconnect, we still have a pending connection,
             } else {
