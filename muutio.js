@@ -1,4 +1,4 @@
-!(function() {
+var muutio = (function() {
   function openLogin(session, path) {
     var url = 'https://app.muut.com/account/auth/login/?path=' + path
     url += '&sessionId=' + session.sessionId
@@ -16,7 +16,7 @@
 
     w.open(url, 'moot_popup', opts + ',width=' + width + ',height=' + height).focus()
   }
-  window.muutio = function(conf, opts, fn) {
+  return function(conf, opts, fn) {
     if (isFn(opts)) {
       fn = opts
       opts = {}
@@ -433,3 +433,9 @@
     return conn
   }
 })()
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = muutio;
+} else {
+  window.muutio = muutio;
+}
