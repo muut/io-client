@@ -3,7 +3,7 @@
   "author": "Muut, Inc.",
   "name": "io-client",
   "description": "Low- level API for the Muut service",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "homepage": "https://muut.io",
   "repository": {
     "url": "https://github.com/muut/io-client"
