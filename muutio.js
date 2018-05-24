@@ -28,7 +28,7 @@ var muutio = (function() {
 
     var self = observable({}, ['ready', 'close', 'reconnect', 'error']),
       host = opts.host || 'https://client-api.muut.com',
-      online = typeof navigator !== 'undefined' ? navigator.onLine : false
+      online = typeof navigator !== 'undefined' ? navigator.onLine : true
 
     // not supported
     if (online === undefined) online = true
