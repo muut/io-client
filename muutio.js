@@ -151,22 +151,25 @@ var muutio = (function() {
       self.emit('thread', thread, seed)
     })
 
-    self.start = function(params, fn) {
-      self.call('init', params, function(data) {
-        fn && fn.call(self, data)
+    self.startPolling = function() {
+      // start polling
+      var poll = typeof navigator !== 'undefined' ? (!navigator.userAgent.toLowerCase().split('googlebot')[1] && opts.poll !== false) : false
 
-        // start polling
-        var poll = typeof navigator !== 'undefined' ? (!navigator.userAgent.toLowerCase().split('googlebot')[1] && opts.poll !== false) : false
-
-        if (self.session && poll) {
-          try {
-            if (typeof window !== 'undefined' && window.EventSource) sse()
-            else longpoll()
-          } catch (e) {
-            console.error(e.stack || e)
-            longpoll()
-          }
+      if (self.session && poll) {
+        try {
+          if (typeof window !== 'undefined' && window.EventSource) sse()
+          else longpoll()
+        } catch (e) {
+          console.error(e.stack || e)
+          longpoll()
         }
+      }
+    }
+
+    self.start = function(params, fn) {
+      self.call('init', params, function(data, session) {
+        fn && fn.call(self, data, session)
+        self.startPolling()
       })
     }
 
