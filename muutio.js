@@ -296,7 +296,17 @@ var muutio = (function() {
       })
     }
 
-    self.start(conf, fn)
+    if (conf.hasInitialized) {
+      if (conf.session) {
+        setSession(conf.session)
+      }
+      fn && fn.call(self)
+      self.startPolling()
+    } else {
+      self.start(conf, fn)
+    }
+
+    
 
     return self
   }
