@@ -1,5 +1,6 @@
 var muutio = (function() {
   var localStorage = typeof window !== 'undefined' ? window.localStorage : {}
+  var nodeXHR = null;
   function openLogin(session, path) {
     var url = 'https://app.muut.com/account/auth/login/?path=' + path
     url += '&sessionId=' + session.sessionId
@@ -17,7 +18,8 @@ var muutio = (function() {
 
     w.open(url, 'moot_popup', opts + ',width=' + width + ',height=' + height).focus()
   }
-  return function(conf, opts, fn) {
+  return function(conf, opts, fn, xhr) {
+    nodeXHR = xhr;
     if (isFn(opts)) {
       fn = opts
       opts = {}
@@ -411,12 +413,16 @@ var muutio = (function() {
   }
 
   function post(host, data, fn) {
-    var conn = new XMLHttpRequest()
+    var conn = nodeXHR ? new nodeXHR() : new XMLHttpRequest()
 
     conn.onload = function(e) {
       var status = conn.status
       if (status >= 200 && status < 400) {
-        fn(JSON.parse(e.target.response))
+        if (nodeXHR) {
+          fn(JSON.parse(conn.responseText))
+        } else {
+          fn(JSON.parse(e.target.response))
+        }
       } else {
         fn({ error: conn.statusText, status: status })
       }
