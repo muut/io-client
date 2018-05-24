@@ -67,7 +67,7 @@ var muutio = (function() {
 
       // done action
       promise.done(function(json) {
-        fn && fn.call(self, json.result)
+        fn && fn.call(self, json.result, json.session)
       })
 
       promise.fail(function(error){
