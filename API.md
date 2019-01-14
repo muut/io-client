@@ -328,6 +328,9 @@ Posts a new reply to a thread.
 - `body`: the message body as JavaScript array of paragraphs. *required*
 - `key`: the id of the post. Shown on the address bar.
 - `watch`: if `true` then the current users starts receiving email notifications about new replies.
+- `pageLocation`: (required if `watch` is set to `true`) the location of the page to be used on the email notification links
+- `pageTitle`: (required if `watch` is set to `true`) the title of the hosting page
+- `mootTitle`: (required if `watch` is set to `true`) same as `pageTitle`
 - `meta`: metadata for the post to be queried when filtering posts. For example `{ public: { foo: 899 }}`
 
 Returns the possibly auto- generated key.
